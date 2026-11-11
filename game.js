@@ -119,6 +119,8 @@ class Asteroid {
 }
 
 // ── Ship ──────────────────────────────────────────────────────────────────────
+const SPEED_DURATION = 5;
+
 class Ship {
   constructor() { this.reset(); }
 
@@ -132,6 +134,7 @@ class Ship {
     this.thrusting     = false;
     this.invincible    = 3;
     this.shootCooldown = 0;
+    this.speedTime     = 0;
     this.dead          = false;
   }
 
@@ -155,8 +158,11 @@ class Ship {
 
     this.vx *= DRAG;
     this.vy *= DRAG;
-    this.x = wrap(this.x + this.vx * dt, W);
-    this.y = wrap(this.y + this.vy * dt, H);
+    const boostedDt = Math.min(dt, this.speedTime);
+    const moveTime = dt + boostedDt;
+    this.x = wrap(this.x + this.vx * moveTime, W);
+    this.y = wrap(this.y + this.vy * moveTime, H);
+    this.speedTime = Math.max(0, this.speedTime - dt);
   }
 
   tryShoot() {
@@ -203,6 +209,35 @@ class Ship {
   }
 }
 
+// ── Power-up Velocidad ────────────────────────────────────────────────────────
+class SpeedPowerUp {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.radius = 13;
+    this.ttl = 10;
+  }
+
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.strokeStyle = '#4df5ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-6, -6);
+    ctx.lineTo(0, 0);
+    ctx.lineTo(-6, 6);
+    ctx.moveTo(1, -6);
+    ctx.lineTo(7, 0);
+    ctx.lineTo(1, 6);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
 // ── Partículas (explosión) ────────────────────────────────────────────────────
 class Particle {
   constructor(x, y) {
@@ -240,6 +275,20 @@ let ship, bullets, asteroids, particles;
 let score, lives, level;
 let state;      // 'playing' | 'dead' | 'gameover'
 let deadTimer;
+let speedPowerUp, powerUpTimer;
+
+function spawnSpeedPowerUp() {
+  for (let i = 0; i < 40; i++) {
+    const x = rand(30, W - 30);
+    const y = rand(45, H - 30);
+    const position = { x, y };
+    if (dist(position, ship) < 100 ||
+        asteroids.some(a => dist(position, a) < a.radius + 25)) continue;
+    speedPowerUp = new SpeedPowerUp(x, y);
+    return;
+  }
+  powerUpTimer = 2; // Reintentar si no hay un lugar libre.
+}
 
 function spawnAsteroids(count) {
   const SAFE_DIST = 130;
@@ -262,6 +311,8 @@ function initGame() {
   lives  = 3;
   level  = 1;
   state  = 'playing';
+  speedPowerUp = null;
+  powerUpTimer = 8;
   spawnAsteroids(4);
 }
 
@@ -269,7 +320,11 @@ function nextLevel() {
   level++;
   bullets   = [];
   particles = [];
+  const remainingSpeed = ship.speedTime;
   ship.reset();
+  ship.speedTime = remainingSpeed;
+  speedPowerUp = null;
+  powerUpTimer = 8;
   spawnAsteroids(3 + level);
 }
 
@@ -280,6 +335,9 @@ function explode(x, y, count = 8) {
 function killShip() {
   explode(ship.x, ship.y, 14);
   ship.dead = true;
+  ship.speedTime = 0;
+  speedPowerUp = null;
+  powerUpTimer = 8;
   lives--;
   if (lives <= 0) {
     state = 'gameover';
@@ -316,6 +374,21 @@ function update(dt) {
   bullets.forEach(b => b.update(dt));
   asteroids.forEach(a => a.update(dt));
   particles.forEach(p => p.update(dt));
+
+  if (speedPowerUp) {
+    speedPowerUp.ttl -= dt;
+    if (dist(ship, speedPowerUp) < ship.radius + speedPowerUp.radius) {
+      ship.speedTime = SPEED_DURATION;
+      speedPowerUp = null;
+      powerUpTimer = rand(10, 15);
+    } else if (speedPowerUp.ttl <= 0) {
+      speedPowerUp = null;
+      powerUpTimer = rand(8, 12);
+    }
+  } else {
+    powerUpTimer -= dt;
+    if (powerUpTimer <= 0) spawnSpeedPowerUp();
+  }
 
   bullets   = bullets.filter(b => !b.dead);
   particles = particles.filter(p => !p.dead);
@@ -381,6 +454,11 @@ function drawHUD() {
   for (let i = 0; i < lives; i++)
     drawLifeIcon(W - 16 - i * 22, 18);
 
+  if (ship.speedTime > 0) {
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#4df5ff';
+    ctx.fillText(`VELOCIDAD  ${ship.speedTime.toFixed(1)}s`, 14, 50);
+  }
 }
 
 function drawOverlay(title, sub) {
@@ -400,6 +478,7 @@ function draw() {
   particles.forEach(p => p.draw());
   asteroids.forEach(a => a.draw());
   bullets.forEach(b => b.draw());
+  if (speedPowerUp && state === 'playing') speedPowerUp.draw();
   ship.draw();
 
   drawHUD();
