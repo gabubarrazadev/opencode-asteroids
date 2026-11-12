@@ -105,7 +105,7 @@ class Asteroid {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
-    ctx.strokeStyle = '#fff';
+    ctx.strokeStyle = this.strokeColor || '#fff';
     ctx.lineWidth   = 1.5;
     ctx.lineJoin    = 'round';
     ctx.beginPath();
@@ -114,6 +114,39 @@ class Asteroid {
       ctx.lineTo(this.verts[i][0], this.verts[i][1]);
     ctx.closePath();
     ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// ── Estrella fugaz ────────────────────────────────────────────────────────────
+class ShootingStar extends Asteroid {
+  constructor(x, y) {
+    super(x, y, 2);
+    this.vx *= 3;
+    this.vy *= 3;
+    this.ttl = 6;
+    this.strokeColor = '#ffd166';
+  }
+
+  update(dt) {
+    super.update(dt);
+    this.ttl -= dt;
+    if (this.ttl <= 0) this.dead = true;
+  }
+
+  split() { return []; }
+
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, this.ttl);
+    const speed = Math.hypot(this.vx, this.vy);
+    ctx.strokeStyle = '#ffd166';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.x - this.vx / speed * 45, this.y - this.vy / speed * 45);
+    ctx.stroke();
+    super.draw();
     ctx.restore();
   }
 }
@@ -292,13 +325,13 @@ function spawnSpeedPowerUp() {
 
 function spawnAsteroids(count) {
   const SAFE_DIST = 130;
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i <= count; i++) {
     let x, y;
     do {
       x = rand(0, W);
       y = rand(0, H);
     } while (Math.hypot(x - W / 2, y - H / 2) < SAFE_DIST);
-    asteroids.push(new Asteroid(x, y, 3));
+    asteroids.push(i === count ? new ShootingStar(x, y) : new Asteroid(x, y, 3));
   }
 }
 
@@ -361,6 +394,7 @@ function update(dt) {
     particles.forEach(p => p.update(dt));
     particles = particles.filter(p => !p.dead);
     asteroids.forEach(a => a.update(dt));
+    asteroids = asteroids.filter(a => !a.dead);
     if (deadTimer <= 0) { state = 'playing'; ship.reset(); }
     return;
   }
@@ -373,6 +407,7 @@ function update(dt) {
   ship.update(dt);
   bullets.forEach(b => b.update(dt));
   asteroids.forEach(a => a.update(dt));
+  asteroids = asteroids.filter(a => !a.dead);
   particles.forEach(p => p.update(dt));
 
   if (speedPowerUp) {
