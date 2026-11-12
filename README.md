@@ -4,7 +4,7 @@ Clon del clásico arcade **Asteroids** implementado en canvas HTML5 puro, sin de
 
 ## Descripción
 
-Nave espacial en un campo de asteroides con envolvimiento de bordes (el espacio es toroidal). Destruye asteroides para sumar puntos: los grandes se parten en medianos, los medianos en pequeños. En cada nivel aparece una estrella fugaz más rápida que los asteroides normales. Esquiva los disparos del OVNI y recoge los power-ups Velocidad y Escudo.
+Nave espacial en un campo de asteroides con envolvimiento de bordes (el espacio es toroidal). Destruye asteroides para sumar puntos: los grandes se parten en medianos, los medianos en pequeños. En cada nivel aparece una estrella fugaz más rápida que los asteroides normales. Esquiva los disparos del OVNI y recoge los power-ups Velocidad, Escudo y Triple Shot.
 
 ## Tecnologías
 
@@ -49,3 +49,4 @@ Luego visita `http://localhost:3000`.
 - Power-up **Velocidad**: aparece periódicamente como un círculo celeste con flechas. Al tocarlo, la nave se desplaza al doble de velocidad durante 5 segundos; el tiempo restante aparece en pantalla.
 - Un **OVNI** aparece periódicamente, cruza la pantalla y dispara hacia la nave. Puedes destruirlo con un disparo para sumar puntos.
 - Power-up **Escudo**: aparece periódicamente como un círculo violeta. Al recogerlo, un anillo protege a la nave de los proyectiles del OVNI durante 5 segundos; el tiempo restante aparece en pantalla. No protege de los asteroides.
+- Power-up **Triple Shot**: comparte el ciclo de aparición con Velocidad y se distingue por su círculo dorado con tres puntos. Al recogerlo, cada pulsación de Espacio dispara tres balas sucesivas en línea recta durante 5 segundos. La dirección de cada ráfaga queda fijada al pulsar; el tiempo restante aparece en pantalla.
