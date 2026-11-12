@@ -24,11 +24,12 @@ Luego visita `http://localhost:3000`.
 
 ## Controles
 
-| Tecla     | Acción     |
-| --------- | ---------- |
-| `←` `→`   | Rotar nave |
-| `↑`       | Propulsar  |
-| `Espacio` | Disparar   |
+| Tecla     | Acción             |
+| --------- | ------------------ |
+| `←` `→`   | Rotar nave         |
+| `↑`       | Propulsar          |
+| `Espacio` | Disparar           |
+| `C`       | Cambiar skin       |
 
 ## Puntuación
 
@@ -50,3 +51,4 @@ Luego visita `http://localhost:3000`.
 - Un **OVNI** aparece periódicamente, cruza la pantalla y dispara hacia la nave. Puedes destruirlo con un disparo para sumar puntos.
 - Power-up **Escudo**: aparece periódicamente como un círculo violeta. Al recogerlo, un anillo protege a la nave de los proyectiles del OVNI durante 5 segundos; el tiempo restante aparece en pantalla. No protege de los asteroides.
 - Power-up **Triple Shot**: comparte el ciclo de aparición con Velocidad y se distingue por su círculo dorado con tres puntos. Al recogerlo, cada pulsación de Espacio dispara tres balas sucesivas en línea recta durante 5 segundos. La dirección de cada ráfaga queda fijada al pulsar; el tiempo restante aparece en pantalla.
+- Tres skins de nave (Clásica, Delta e Interceptor): pulsa `C` para alternarlas en cualquier momento. La elección aparece en pantalla, se refleja en los iconos de vidas y se guarda en el navegador para próximas partidas.
